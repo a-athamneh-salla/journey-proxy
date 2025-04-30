@@ -15,4 +15,17 @@ export const API_CONFIG = {
 export const AUTH_CONFIG = {
   JWT_SECRET: process.env.JWT_SECRET || 'your-jwt-secret-key',
   WEBHOOK_SECRET: process.env.WEBHOOK_SECRET || 'your-webhook-secret-key',
+  JWT_EXPIRATION: process.env.JWT_EXPIRATION || '24h', // Token expiration time
+  API_KEY_PREFIX: 'ApiKey', // Prefix for API key authentication in Authorization header
+};
+
+// Database configuration
+export const DB_CONFIG = {
+  // D1 database is connected via wrangler.toml bindings
+  MIGRATIONS_DIR: './migrations',
+  DEFAULT_USER: {
+    USERNAME: process.env.DEFAULT_USERNAME || 'admin',
+    PASSWORD: process.env.DEFAULT_PASSWORD || 'changeme',
+    EMAIL: process.env.DEFAULT_EMAIL || 'admin@example.com',
+  },
 };

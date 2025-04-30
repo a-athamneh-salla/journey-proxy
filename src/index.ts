@@ -3,9 +3,11 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import proxy from './routes/proxy';
 import webhook from './routes/webhook';
+import users from './routes/users';
+import { Env } from './types/database';
 
 // Create the main Hono application
-const app = new Hono();
+const app = new Hono<{ Bindings: Env }>();
 
 // Apply global middlewares
 app.use('*', logger());
@@ -29,6 +31,7 @@ app.get('/', (c) => {
 // Mount our route handlers
 app.route('/proxy', proxy);
 app.route('/webhook', webhook);
+app.route('/users', users);
 
 // Error handling for all routes
 app.onError((err, c) => {

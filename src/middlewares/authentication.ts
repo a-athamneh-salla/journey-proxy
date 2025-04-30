@@ -1,6 +1,21 @@
 import { Context } from 'hono';
-import jwt from 'jsonwebtoken';
+import { verifyJwtToken } from '../helpers/auth';
+import { validateApiKey } from '../helpers/auth';
+import { getUserById } from '../helpers/users';
+import { Env } from '../types/database';
 import { AUTH_CONFIG } from '../config/api';
+
+interface UserData {
+  userId: string;
+  username: string;
+}
+
+// Types for Hono context with our app-specific variables
+declare module 'hono' {
+  interface ContextVariableMap {
+    user: UserData;
+  }
+}
 
 // Helper to safely get header value considering different header formats in production vs test
 const getHeaderValue = (c: Context, headerName: string): string | null => {
@@ -29,30 +44,57 @@ const getHeaderValue = (c: Context, headerName: string): string | null => {
 };
 
 // Middleware for validating JWT tokens
-export const jwtAuthMiddleware = async (c: Context, next: () => Promise<void>) => {
+export const jwtAuthMiddleware = async (c: Context<{ Bindings: Env }>, next: () => Promise<void>) => {
   try {
     const authHeader = getHeaderValue(c, 'Authorization');
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return c.text('Unauthorized', 401);
+    if (!authHeader) {
+      return c.text('Unauthorized - Missing Authentication', 401);
     }
 
-    const token = authHeader.split(' ')[1];
-    
-    // For test environment - special case for valid-test-token
-    if (token === 'valid-test-token') {
-      c.set('user', { userId: '123', username: 'testuser' });
+    // Check for JWT token
+    if (authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      
+      // For test environment - special case for valid-test-token
+      if (token === 'valid-test-token' && process.env.NODE_ENV === 'test') {
+        c.set('user', { userId: 'test-123', username: 'testuser' });
+        await next();
+        return;
+      }
+      
+      try {
+        const decoded = verifyJwtToken(token);
+        if (!decoded) {
+          return c.text('Invalid token', 401);
+        }
+        
+        c.set('user', decoded as UserData);
+        await next();
+        return;
+      } catch (err) {
+        return c.text('Invalid token', 401);
+      }
+    } 
+    // Check for API key
+    else if (authHeader.startsWith('ApiKey ')) {
+      const apiKey = authHeader.split(' ')[1];
+      const userId = await validateApiKey(c.env.DB, apiKey);
+      
+      if (!userId) {
+        return c.text('Invalid API key', 401);
+      }
+      
+      const user = await getUserById(c.env.DB, userId);
+      if (!user) {
+        return c.text('User not found', 401);
+      }
+      
+      c.set('user', { userId: user.id, username: user.username });
       await next();
       return;
-    }
-    
-    try {
-      const decoded = jwt.verify(token, AUTH_CONFIG.JWT_SECRET);
-      c.set('user', decoded);
-      await next();
-      return; // Add explicit return to fix "not all code paths return a value" error
-    } catch (err) {
-      return c.text('Invalid token', 401);
+    } else {
+      return c.text('Unauthorized - Invalid Authentication Format', 401);
     }
   } catch (error) {
     console.error('JWT Auth Middleware Error:', error);
@@ -70,7 +112,7 @@ export const webhookAuthMiddleware = async (c: Context, next: () => Promise<void
     }
 
     await next();
-    return; // Add explicit return to fix "not all code paths return a value" error
+    return;
   } catch (error) {
     console.error('Webhook Auth Middleware Error:', error);
     return c.text('Authentication error', 500);

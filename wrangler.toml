@@ -15,6 +15,13 @@ port = 8787
 # Optionally add your account ID here if you don't want to use the CLI interactive prompt
 # account_id = ""
 
+# D1 Database configuration
+[[d1_databases]]
+binding = "DB"
+database_name = "salla_proxy_db"
+database_id = "salla-proxy-db"
+migrations_dir = "./migrations"
+
 [env.production]
 # Route configuration for production
 # route = "your-production-domain.com/*"

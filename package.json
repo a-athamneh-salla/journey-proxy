@@ -9,7 +9,9 @@
     "deploy": "wrangler deploy",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write 'src/**/*.{ts,js}'",
-    "start:local": "node dist/index.js"
+    "start:local": "node dist/index.js",
+    "db:migrate": "wrangler d1 migrations apply salla-proxy-db",
+    "db:create-user": "node scripts/create-user.js"
   },
   "keywords": [
     "proxy",
@@ -21,19 +23,23 @@
   "author": "Salla Team",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "hono": "^4.7.7",
     "jsonwebtoken": "^9.0.2",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240417.0",
-    "vitest": "^0.34.6",
-    "wrangler": "^4.13.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.2",
+    "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^5.59.6",
     "@typescript-eslint/parser": "^5.59.6",
-    "eslint": "^8.56.0"
+    "eslint": "^8.56.0",
+    "vitest": "^0.34.6",
+    "wrangler": "^4.13.2"
   },
   "directories": {
     "test": "tests"

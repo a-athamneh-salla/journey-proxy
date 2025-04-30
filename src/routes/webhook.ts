@@ -1,62 +1,59 @@
 import { Hono } from 'hono';
 import { webhookAuthMiddleware } from '../middlewares/authentication';
+import { Env } from '../types/database';
 
-const webhook = new Hono();
+const webhook = new Hono<{ Bindings: Env }>();
 
-// Apply webhook authentication middleware to all webhook routes
+// Apply webhook authentication middleware
 webhook.use('*', webhookAuthMiddleware);
 
-// Handle POST requests to the webhook endpoint
+// Handle webhook POST requests
 webhook.post('/', async (c) => {
   try {
-    const body = await c.req.json();
+    const payload = await c.req.json();
     
-    // Log the webhook payload for audit purposes
-    console.log(`Webhook received: ${JSON.stringify(body)}`);
+    console.log('Webhook received:', JSON.stringify(payload));
     
-    // Process the webhook based on type
-    const webhookType = body.type || 'unknown';
+    // Process the webhook based on event type
+    const eventType = payload.event || 'unknown';
     
-    switch (webhookType) {
-      case 'user_created':
-        // Example: Process user creation webhook
-        await processUserCreatedWebhook(body);
+    switch(eventType) {
+      case 'task_success':
+        // Handle task success event
+        console.log(`Task succeeded: ${payload.task_id}`);
         break;
-      case 'order_completed':
-        // Example: Process order completion webhook
-        await processOrderCompletedWebhook(body);
+        
+      case 'task_failed':
+        // Handle task failure event
+        console.log(`Task failed: ${payload.task_id}`);
         break;
-      case 'subscription_updated':
-        // Example: Process subscription update webhook
-        await processSubscriptionWebhook(body);
+        
+      case 'dag_success':
+        // Handle DAG success event
+        console.log(`DAG succeeded: ${payload.dag_id}`);
         break;
+        
+      case 'dag_failed':
+        // Handle DAG failure event
+        console.log(`DAG failed: ${payload.dag_id}`);
+        break;
+        
       default:
-        // Log unhandled webhook types
-        console.log(`Unhandled webhook type: ${webhookType}`);
+        console.log(`Unhandled event type: ${eventType}`);
     }
     
-    // Return a success response
-    return c.json({ success: true, message: `Webhook ${webhookType} processed successfully` }, 200);
+    return c.json({ 
+      status: 'success', 
+      message: 'Webhook received and processed',
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
     console.error('Webhook processing error:', error);
-    return c.json({ error: 'Failed to process webhook' }, 500);
+    return c.json({ 
+      status: 'error', 
+      message: 'Failed to process webhook'
+    }, 500);
   }
 });
-
-// Example webhook processing functions
-async function processUserCreatedWebhook(data: any) {
-  // Implementation would connect to necessary systems to process user creation
-  console.log(`Processing user creation for ${data.user?.id}`);
-}
-
-async function processOrderCompletedWebhook(data: any) {
-  // Implementation would handle order completion logic
-  console.log(`Processing order completion for order ${data.order?.id}`);
-}
-
-async function processSubscriptionWebhook(data: any) {
-  // Implementation would handle subscription updates
-  console.log(`Processing subscription update for ${data.subscription?.id}`);
-}
 
 export default webhook;
