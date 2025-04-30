@@ -1,0 +1,42 @@
+{
+  "name": "journey-proxy",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "vitest run",
+    "dev": "wrangler dev src/index.ts",
+    "build": "tsc",
+    "deploy": "wrangler deploy",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write 'src/**/*.{ts,js}'",
+    "start:local": "node dist/index.js"
+  },
+  "keywords": [
+    "proxy",
+    "cloudflare",
+    "worker",
+    "typescript",
+    "hono"
+  ],
+  "author": "Salla Team",
+  "license": "ISC",
+  "dependencies": {
+    "hono": "^4.7.7",
+    "jsonwebtoken": "^9.0.2",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240417.0",
+    "vitest": "^0.34.6",
+    "wrangler": "^4.13.2",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.59.6",
+    "@typescript-eslint/parser": "^5.59.6",
+    "eslint": "^8.56.0"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "description": "A secure proxy service for Salla applications to communicate with Airflow APIs and handle webhook events"
+}

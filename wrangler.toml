@@ -1,0 +1,26 @@
+name = "journey-proxy"
+main = "src/index.ts"
+compatibility_date = "2025-04-28"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run build"
+
+[dev]
+port = 8787
+
+[vars]
+# Runtime environment variables
+
+# Optionally add your account ID here if you don't want to use the CLI interactive prompt
+# account_id = ""
+
+[env.production]
+# Route configuration for production
+# route = "your-production-domain.com/*"
+# zone_id = ""
+
+[env.staging]
+# Route configuration for staging
+# route = "staging-journey-proxy.example.com/*"
+# zone_id = ""

@@ -1,0 +1,138 @@
+openapi: 3.0.0
+info:
+  title: Proxy Application API
+  description: API documentation for the proxy application built with Hono.js and deployed on Cloudflare Workers.
+  version: 1.0.0
+paths:
+  /proxy:
+    post:
+      summary: Proxy client-side requests to Airflow API
+      description: Receives client-side requests, authenticates them using JWT, and redirects to the Airflow API with basic authentication.
+      security:
+        - jwtAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  description: Payload to be sent to the Airflow API.
+      responses:
+        '200':
+          description: Request successfully proxied to Airflow API.
+        '401':
+          description: Unauthorized request.
+    put:
+      summary: Proxy client-side PUT requests to Airflow API
+      description: Receives client-side PUT requests, authenticates them using JWT, and redirects to the Airflow API with basic authentication.
+      security:
+        - jwtAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  description: Payload to be sent to the Airflow API.
+      responses:
+        '200':
+          description: Request successfully proxied to Airflow API.
+        '401':
+          description: Unauthorized request.
+    patch:
+      summary: Proxy client-side PATCH requests to Airflow API
+      description: Receives client-side PATCH requests, authenticates them using JWT, and redirects to the Airflow API with basic authentication.
+      security:
+        - jwtAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  description: Payload to be sent to the Airflow API.
+      responses:
+        '200':
+          description: Request successfully proxied to Airflow API.
+        '401':
+          description: Unauthorized request.
+    get:
+      summary: Proxy client-side GET requests to Airflow API
+      description: Receives client-side GET requests, authenticates them using JWT, and redirects to the Airflow API with basic authentication.
+      security:
+        - jwtAuth: []
+      parameters:
+        - in: query
+          name: query
+          schema:
+            type: string
+          description: Query parameters to be sent to the Airflow API.
+      responses:
+        '200':
+          description: Request successfully proxied to Airflow API.
+        '401':
+          description: Unauthorized request.
+  /proxy/{wildcard*}:
+    post:
+      summary: Proxy client-side requests with wildcard to Airflow API
+      description: Receives client-side requests with wildcard, authenticates them using JWT, and redirects to the Airflow API with basic authentication.
+      security:
+        - jwtAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  description: Payload to be sent to the Airflow API.
+      responses:
+        '200':
+          description: Request successfully proxied to Airflow API.
+        '401':
+          description: Unauthorized request.
+  /webhook:
+    post:
+      summary: Handle webhooks from Airflow server
+      description: Receives and authenticates webhooks from the Airflow server using a shared secret.
+      security:
+        - webhookSecret: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event:
+                  type: string
+                  description: Event type from the Airflow server.
+                payload:
+                  type: object
+                  description: Payload of the webhook.
+      responses:
+        '200':
+          description: Webhook successfully processed.
+        '401':
+          description: Unauthorized webhook request.
+components:
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    webhookSecret:
+      type: apiKey
+      in: header
+      name: X-Webhook-Secret
